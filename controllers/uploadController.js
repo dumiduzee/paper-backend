@@ -57,9 +57,11 @@ export const handleFileUpload = (req, res) => {
       });
       await newUpload.save();
 
-      res
-        .status(200)
-        .json({ message: "Upload successful.", uploadedFiles: fileUrls });
+      res.status(200).json({
+        success: true,
+        message: "Upload successful.",
+        uploadedFiles: fileUrls,
+      });
     } catch (error) {
       res.status(500).json({ message: "Error saving file data." });
     }

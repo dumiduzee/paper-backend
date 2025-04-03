@@ -48,7 +48,6 @@
       };
     </script>
     <style>
-      /* Custom scrollbar */
       ::-webkit-scrollbar {
         width: 8px;
       }
@@ -85,7 +84,7 @@
                 >Grade</label
               >
               <select
-                id="grade"
+                id="gradeSelection"
                 name="grade"
                 class="w-full px-3 py-2 bg-dark-200 border border-dark-400 text-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 transition duration-300"
               >
@@ -104,14 +103,7 @@
                 name="subject"
                 class="w-full px-3 py-2 bg-dark-200 border border-dark-400 text-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 transition duration-300"
               >
-                <option value="Mathematics">Mathematics</option>
-                <option value="Science">Science</option>
-                <option value="History">History</option>
-                <option value="Geography">Geography</option>
-                <option value="English">English</option>
-                <option value="Physics">Physics</option>
-                <option value="Chemistry">Chemistry</option>
-                <option value="Biology">Biology</option>
+                <option value="">Select Subject</option>
               </select>
             </div>
           </div>
@@ -145,7 +137,6 @@
                 accept="application/pdf"
                 class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
               />
-
               <div class="text-center">
                 <svg
                   class="mx-auto w-12 h-12 text-dark-600 group-hover:text-brand-50 transition duration-300"
@@ -226,8 +217,6 @@
       const fileInput = document.getElementById("pdfs");
       const dropArea = document.getElementById("dropArea");
       const fileNameDisplay = document.getElementById("fileNameDisplay");
-
-      // Handle file selection
       fileInput.addEventListener("change", function () {
         if (fileInput.files.length > 0) {
           fileNameDisplay.textContent =
@@ -238,80 +227,299 @@
         }
       });
 
-      // Drag & Drop functionality
-      dropArea.addEventListener("dragover", (event) => {
-        event.preventDefault();
-        dropArea.classList.add("border-brand-500");
-      });
+      const subjectsByGrade = {
+        1: ["සිංහල", "ගණිතය", " පරිසරය"],
+        2: ["සිංහල", "ගණිතය", "පරිසරය"],
+        3: ["සිංහල", "ගණිතය", "පරිසරය"],
+        4: [
+          "සිංහල",
+          "ගණිතය",
+          "පරිසරය",
+          "ඉංග්‍රීසි",
+          "බුද්ධ_ධර්මය",
+          "කතෝලික_ධර්මය",
+          "ඉස්ලාම්_ධර්මය",
+          "දෙමළ",
+        ],
+        5: [
+          "සිංහල",
+          "ගණිතය",
+          "පරිසරය",
+          "ඉංග්‍රීසි",
+          "බුද්ධ_ධර්මය",
+          "කතෝලික_ධර්මය",
+          "ඉස්ලාම්_ධර්මය",
+          "දෙමළ",
+        ],
+        6: [
+          "බුද්ධ_ධර්මය",
+          "ක්‍රිස්තියානි_ධර්මය",
+          "කතෝලික_ධර්මය",
+          "ඉස්ලාම්_ධර්මය",
+          "සිංහල_භාශාව_පලවෙනි_බස",
+          "ඉංග්‍රීසි",
+          "ගණිතය",
+          "ඉතිහාසය",
+          "විද්‍යාව",
+          "භූගෝල_විද්‍යාව",
+          "ජීවන_නිපුනතා_හා_පුරවැසි_අධ්‍යාපනය",
+          "දෙමළ",
+          "ප්‍රායෝගික_හා_තාක්ෂණික_කුසලතා",
+          "තොරතුරු_හා_සන්නිවේදන_තාක්ෂණය",
+          "සෞඛ්‍ය_හා_ශාරීරික_අධ්‍යාපනය",
+          "පෙරදිග_සංගීතය",
+          "චිත්‍ර",
+          "නර්තනය",
+          "නාට්‍ය_හා_රංග_කලාව",
+        ],
+        7: [
+          "බුද්ධ_ධර්මය",
+          "ක්‍රිස්තියානි_ධර්මය",
+          "කතෝලික_ධර්මය",
+          "ඉස්ලාම්_ධර්මය",
+          "සිංහල_භාශාව_පලවෙනි_බස",
+          "ඉංග්‍රීසි",
+          "ගණිතය",
+          "ඉතිහාසය",
+          "විද්‍යාව",
+          "භූගෝල_විද්‍යාව",
+          "ජීවන_නිපුනතා_හා_පුරවැසි_අධ්‍යාපනය",
+          "දෙමළ",
+          "ප්‍රායෝගික_හා_තාක්ෂණික_කුසලතා",
+          "තොරතුරු_හා_සන්නිවේදන_තාක්ෂණය",
+          "සෞඛ්‍ය_හා_ශාරීරික_අධ්‍යාපනය",
+          "පෙරදිග_සංගීතය",
+          "චිත්‍ර",
+          "නර්තනය",
+          "නාට්‍ය_හා_රංග_කලාව",
+        ],
+        8: [
+          "බුද්ධ_ධර්මය",
+          "ක්‍රිස්තියානි_ධර්මය",
+          "කතෝලික_ධර්මය",
+          "ඉස්ලාම්_ධර්මය",
+          "සිංහල_භාශාව_පලවෙනි_බස",
+          "ඉංග්‍රීසි",
+          "ගණිතය",
+          "ඉතිහාසය",
+          "විද්‍යාව",
+          "භූගෝල_විද්‍යාව",
+          "ජීවන_නිපුනතා_හා_පුරවැසි_අධ්‍යාපනය",
+          "දෙමළ",
+          "ප්‍රායෝගික_හා_තාක්ෂණික_කුසලතා",
+          "තොරතුරු_හා_සන්නිවේදන_තාක්ෂණය",
+          "සෞඛ්‍ය_හා_ශාරීරික_අධ්‍යාපනය",
+          "පෙරදිග_සංගීතය",
+          "චිත්‍ර",
+          "නර්තනය",
+          "නාට්‍ය_හා_රංග_කලාව",
+        ],
+        9: [
+          "බුද්ධ_ධර්මය",
+          "ක්‍රිස්තියානි_ධර්මය",
+          "කතෝලික_ධර්මය",
+          "ඉස්ලාම්_ධර්මය",
+          "සිංහල_භාශාව_පලවෙනි_බස",
+          "ඉංග්‍රීසි",
+          "ගණිතය",
+          "ඉතිහාසය",
+          "විද්‍යාව",
+          "භූගෝල_විද්‍යාව",
+          "ජීවන_නිපුනතා_හා_පුරවැසි_අධ්‍යාපනය",
+          "දෙමළ",
+          "ප්‍රායෝගික_හා_තාක්ෂණික_කුසලතා",
+          "තොරතුරු_හා_සන්නිවේදන_තාක්ෂණය",
+          "සෞඛ්‍ය_හා_ශාරීරික_අධ්‍යාපනය",
+          "පෙරදිග_සංගීතය",
+          "චිත්‍ර",
+          "නර්තනය",
+          "නාට්‍ය_හා_රංග_කලාව",
+        ],
+        10: [
+          "බුද්ධ_ධර්මය",
+          "ක්‍රිස්තියානි_ධර්මය",
+          "කතෝලික_ධර්මය",
+          "ඉස්ලාම්_ධර්මය",
+          "සිංහල_භාශාව_පලවෙනි_බස",
+          "ඉංග්‍රීසි",
+          "ගණිතය",
+          "ඉතිහාසය",
+          "විද්‍යාව",
+          "ව්‍යාපාර_අධ්‍යයනය_හා_ගිණුම්කරණය",
+          "භූගෝල_විද්‍යාව",
+          "ජීවන_නිපුනතා_හා_පුරවැසි_අධ්‍යාපනය",
+          "ව්‍යවසායකත්ව_අධ්‍යයනය",
+          "දෙමළ",
+          "පාලි_භාෂාව",
+          "හින්දි_භාෂාව",
+          "ජපන්_භාෂාව",
+          "පෙරදිග_සංගීතය",
+          "අපරදිග_සංගීතය",
+          "චිත්‍ර",
+          "සාම්ප්‍රදායික_නර්තනය",
+          "සිංහල_සාහිත්‍යය_රසාස්වාදය",
+          "නාට්‍ය_හා_රංග_කලාව",
+          "තොරතුරු_හා_සන්නිවේදන_තාක්ෂණය",
+          "කෘෂි_හා_ආහාර_තාක්ෂණවේදය",
+          "ජලජ_ජීව_සම්පත්_තාක්ෂණවේදය",
+          "ශිල්ප_කලා",
+          "ගෘහ ආර්ථික විද්‍යාව",
+          "සෞඛ්‍ය_හා_ශාරීරික_අධ්‍යාපනය",
+          "සන්නිවේදනය_හා_මාධ්‍ය_අධ්‍යයනය",
+          "නිර්මාණකරණය_හා_ඉදිකිරීම්_තාක්ෂණවේදය",
+          "නිර්මාණකරණය_හා_යාන්ත්‍රික_තාක්ෂණවේදය",
+          "නිර්මාණකරණය_විදුලිය_සහ_ඉලෙක්ට්‍රානික_තාක්ෂණවේදය",
+        ],
+        11: [
+          "බුද්ධ_ධර්මය",
+          "ක්‍රිස්තියානි_ධර්මය",
+          "කතෝලික_ධර්මය",
+          "ඉස්ලාම්_ධර්මය",
+          "සිංහල_භාශාව_පලවෙනි_බස",
+          "ඉංග්‍රීසි",
+          "ගණිතය",
+          "ඉතිහාසය",
+          "විද්‍යාව",
+          "ව්‍යාපාර_අධ්‍යයනය_හා_ගිණුම්කරණය",
+          "භූගෝල_විද්‍යාව",
+          "ජීවන_නිපුනතා_හා_පුරවැසි_අධ්‍යාපනය",
+          "ව්‍යවසායකත්ව_අධ්‍යයනය",
+          "දෙමළ",
+          "පාලි_භාෂාව",
+          "හින්දි_භාෂාව",
+          "ජපන්_භාෂාව",
+          "පෙරදිග_සංගීතය",
+          "අපරදිග_සංගීතය",
+          "චිත්‍ර",
+          "සාම්ප්‍රදායික_නර්තනය",
+          "සිංහල_සාහිත්‍යය_රසාස්වාදය",
+          "නාට්‍ය_හා_රංග_කලාව",
+          "තොරතුරු_හා_සන්නිවේදන_තාක්ෂණය",
+          "කෘෂි_හා_ආහාර_තාක්ෂණවේදය",
+          "ජලජ_ජීව_සම්පත්_තාක්ෂණවේදය",
+          "ශිල්ප_කලා",
+          "ගෘහ ආර්ථික විද්‍යාව",
+          "සෞඛ්‍ය_හා_ශාරීරික_අධ්‍යාපනය",
+          "සන්නිවේදනය_හා_මාධ්‍ය_අධ්‍යයනය",
+          "නිර්මාණකරණය_හා_ඉදිකිරීම්_තාක්ෂණවේදය",
+          "නිර්මාණකරණය_හා_යාන්ත්‍රික_තාක්ෂණවේදය",
+          "නිර්මාණකරණය_විදුලිය_සහ_ඉලෙක්ට්‍රානික_තාක්ෂණවේදය",
+        ],
+        12: [
+          "භෞතික_විද්‍යාව",
+          "රසායන_විද්‍යාව",
+          "කෘෂි_විද්‍යාව",
+          "ජීව_විද්‍යාව",
+          "ගණිතය",
+          "සංයුක්ත_ගණිතය",
+          "උසස්_ගණිතය",
+          "සිංහල_භාෂාව",
+          "තර්කනය_සහ_විද්‍යාත්මක_ක්‍රමය",
+          "භූගෝල_විද්‍යාව",
+          "දේශපාලන_විද්‍යාව",
+          "ඉතිහාසය",
+          "ජර්මන්_භාෂාව",
+          "සන්නිවේදනය_හා_මාධ්‍ය_අධ්‍යනය",
+          "ගෘහ_ආර්ථික_විද්‍යාව",
+          "බුද්ධාගම",
+          "ක්‍රිස්තියානි_ධර්මය",
+          "බෞද්ධ_ශිෂ්ටාචාරය",
+          "කිතුනු_ශිෂ්ටාචාරය",
+          "චිත්‍ර",
+          "නාට්‍ය_හා_රංග_කලාව",
+          "නර්තනය",
+          "පෙරදිග_සංගීතය",
+          "බටහිර_සංගීතය",
+          "ආර්ථික_විද්‍යාව",
+          "ව්‍යාපාර_සංඛ්‍යානය",
+          "ව්‍යාපාර_අධ්‍යයනය",
+          "ගිණුම්කරණය",
+          "තොරතුරු_හා_සන්නිවේදන_තාක්ෂණය",
+          "තාක්ෂණය_සඳහා_විද්‍යාව",
+          "ඉංජිනේරු_තාක්ෂණය",
+          "ජෛව_පද්ධති_තාක්ෂණය",
+        ],
+        13: [
+          "භෞතික_විද්‍යාව",
+          "රසායන_විද්‍යාව",
+          "කෘෂි_විද්‍යාව",
+          "ජීව_විද්‍යාව",
+          "ගණිතය",
+          "සංයුක්ත_ගණිතය",
+          "උසස්_ගණිතය",
+          "සිංහල_භාෂාව",
+          "තර්කනය_සහ_විද්‍යාත්මක_ක්‍රමය",
+          "භූගෝල_විද්‍යාව",
+          "දේශපාලන_විද්‍යාව",
+          "ඉතිහාසය",
+          "ජර්මන්_භාෂාව",
+          "සන්නිවේදනය_හා_මාධ්‍ය_අධ්‍යනය",
+          "ගෘහ_ආර්ථික_විද්‍යාව",
+          "බුද්ධාගම",
+          "ක්‍රිස්තියානි_ධර්මය",
+          "බෞද්ධ_ශිෂ්ටාචාරය",
+          "කිතුනු_ශිෂ්ටාචාරය",
+          "චිත්‍ර",
+          "නාට්‍ය_හා_රංග_කලාව",
+          "නර්තනය",
+          "පෙරදිග_සංගීතය",
+          "බටහිර_සංගීතය",
+          "ආර්ථික_විද්‍යාව",
+          "ව්‍යාපාර_සංඛ්‍යානය",
+          "ව්‍යාපාර_අධ්‍යයනය",
+          "ගිණුම්කරණය",
+          "තොරතුරු_හා_සන්නිවේදන_තාක්ෂණය",
+          "තාක්ෂණය_සඳහා_විද්‍යාව",
+          "ඉංජිනේරු_තාක්ෂණය",
+          "ජෛව_පද්ධති_තාක්ෂණය",
+        ],
+      };
 
-      dropArea.addEventListener("dragleave", () => {
-        dropArea.classList.remove("border-brand-500");
-      });
-
-      dropArea.addEventListener("drop", (event) => {
-        event.preventDefault();
-        dropArea.classList.remove("border-brand-500");
-        fileInput.files = event.dataTransfer.files;
-        fileInput.dispatchEvent(new Event("change"));
-      });
-
-      // Handle form submission
       document
-        .getElementById("uploadForm")
-        .addEventListener("submit", async (event) => {
-          event.preventDefault();
-          const formData = new FormData(event.target);
-          console.log(formData);
-
-          const progressWrapper = document.getElementById("progressWrapper");
-          const popup = document.getElementById("popup");
-          const uploadedFilesList =
-            document.getElementById("uploadedFilesList");
-
-          // Show progress spinner
-          progressWrapper.classList.remove("hidden");
-
-          const xhr = new XMLHttpRequest();
-          xhr.open("POST", "/upload", true);
-
-          xhr.onload = function () {
-            progressWrapper.classList.add("hidden");
-            if (xhr.status === 200) {
-              const response = JSON.parse(xhr.responseText);
-              showPopup("Files uploaded successfully!", "bg-green-600");
-
-              // Display uploaded files as download links
-              response.uploadedFiles.forEach((fileUrl) => {
-                const listItem = document.createElement("li");
-                listItem.innerHTML = `
-                                <a href="${fileUrl}" target="_blank" class="flex items-center justify-between bg-dark-200 hover:bg-dark-300 px-4 py-2 rounded-lg transition duration-300">
-                                    <span class="text-brand-50 font-medium truncate">${fileUrl
-                                      .split("/")
-                                      .pop()}</span>
-                                    <svg class="w-5 h-5 text-brand-50" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                    </svg>
-                                </a>`;
-                uploadedFilesList.appendChild(listItem);
-              });
-            } else {
-              showPopup("Error uploading files!", "bg-red-600");
-            }
-          };
-
-          xhr.send(formData);
+        .getElementById("gradeSelection")
+        .addEventListener("change", function () {
+          const grade = this.value;
+          const subjectSelect = document.getElementById("subject");
+          const subjects = subjectsByGrade[grade] || [];
+          subjectSelect.innerHTML = "<option value=''>Select Subject</option>";
+          subjects.forEach((subject) => {
+            const option = document.createElement("option");
+            option.value = subject;
+            option.textContent = subject;
+            subjectSelect.appendChild(option);
+          });
         });
 
-      function showPopup(message, bgColor) {
-        const popup = document.getElementById("popup");
-        popup.textContent = message;
-        popup.className = `fixed top-6 right-6 text-white px-6 py-3 rounded-lg shadow-lg ${bgColor} z-50`;
-        popup.classList.remove("hidden");
+      document
+        .getElementById("uploadForm")
+        .addEventListener("submit", async function (event) {
+          event.preventDefault();
+          const formData = new FormData(this);
+          const progressWrapper = document.getElementById("progressWrapper");
+          progressWrapper.classList.remove("hidden");
 
-        setTimeout(() => {
-          popup.classList.add("hidden");
-        }, 3000);
-      }
+          const response = await fetch("/upload", {
+            method: "POST",
+            body: formData,
+          });
+
+          const result = await response.json();
+          progressWrapper.classList.add("hidden");
+
+          const popup = document.getElementById("popup");
+          console.log(result);
+
+          if (result.success) {
+            popup.textContent = "Files uploaded successfully!";
+            popup.classList.add("bg-green-600");
+          } else {
+            popup.textContent = "Error uploading files. Please try again.";
+            popup.classList.add("bg-red-600");
+          }
+
+          popup.classList.remove("hidden");
+          setTimeout(() => popup.classList.add("hidden"), 3000);
+        });
     </script>
   </body>
 </html>
