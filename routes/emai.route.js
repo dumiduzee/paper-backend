@@ -14,6 +14,7 @@ const email_router = Router();
 const limiter = rateLimit({
   windowMs: 60 * 60 * 1000,
   limit: 20,
+  validate: { xForwardedForHeader: false },
   message: "Too many hits",
 });
 
