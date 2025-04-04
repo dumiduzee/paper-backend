@@ -7,6 +7,7 @@ import path from "path";
 import bodyParser from "body-parser";
 import get_paper_router from "./routes/get.papers.js";
 import { connect_db } from "./db/db.js";
+import email_router from "./routes/emai.route.js";
 
 dotenv.config();
 
@@ -14,11 +15,9 @@ const app = express();
 
 // Middleware
 app.use(bodyParser.json());
-
-// Parse incoming requests with URL-encoded payloads (for form data like key_validator)
+app.use(bodyParser.urlencoded());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
-
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
@@ -41,6 +40,7 @@ app.get("/", (req, res) => {
 
 app.use("/upload", uploadRoutes);
 app.use("/api/v1/papers", get_paper_router);
+app.use("/api/v1/contact", email_router);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
