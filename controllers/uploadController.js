@@ -18,9 +18,9 @@ const storage = multer.diskStorage({
     cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
-    const uniqueFileName = `${req.body.fileName}-${Date.now()}${path.extname(
-      file.originalname
-    )}`;
+    const uniqueFileName = `${req.body.fileName
+      .trim()
+      .replace(/ /g, "_")}-${Date.now()}${path.extname(file.originalname)}`;
     cb(null, uniqueFileName);
   },
 });
@@ -46,7 +46,9 @@ export const handleFileUpload = (req, res) => {
       const baseUrl = `${req.protocol}://${req.get("host")}`;
       const fileUrls = req.files.map(
         (file) =>
-          `${baseUrl}/uploads/grade_${grade}/${subject}/${file.filename}`
+          `${baseUrl}/uploads/grade_${grade}/${subject}/${file.filename
+            .trim()
+            .replace(/ /g, "_")}`
       );
 
       const newUpload = new Upload({
@@ -63,6 +65,8 @@ export const handleFileUpload = (req, res) => {
         uploadedFiles: fileUrls,
       });
     } catch (error) {
+      console.log(error);
+
       res.status(500).json({ message: "Error saving file data." });
     }
   });
