@@ -77,3 +77,12 @@ export const delete_email = async (req, res) => {
     });
   }
 };
+
+export const get_count = async (req, res) => {
+  try {
+    const count = await email_model.countDocuments();
+    res.status(200).json({ count });
+  } catch (error) {
+    res.status(500).json({ status: false, message: error.message });
+  }
+};

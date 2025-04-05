@@ -5,6 +5,7 @@ import {
   delete_email,
   get_emails,
   send_emails,
+  get_count
 } from "../controllers/email.controller.js";
 import rateLimit from "express-rate-limit";
 
@@ -21,6 +22,7 @@ const limiter = rateLimit({
 email_router.post("/email", limiter, email_validator, send_emails);
 email_router.get("/getemails", get_emails);
 email_router.get("/deleteemail/:id", delete_email);
+email_router.get("/getcount",get_count)
 // email_router.post("/get-email");
 
 export default email_router;
