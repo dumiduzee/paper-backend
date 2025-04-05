@@ -27,9 +27,8 @@ export const get_papers = async (req, res) => {
     const papers = await uploadModel.find({ grade, subject });
 
     const data = papers.map((paper) => {
-      return { name: paper.fileName, link: paper.filePaths[0] };
+      return { name: paper.fileName, link: paper.filePaths };
     });
-    console.log(data);
 
     res.json({
       data,
