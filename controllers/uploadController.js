@@ -25,15 +25,13 @@ const storage = multer.diskStorage({
   },
 });
 
-const upload = multer({ storage }).array("pdfs", 10);
+const upload = multer({ storage }).array("pdfs", 20);
 
 export const handleFileUpload = (req, res) => {
   upload(req, res, async (err) => {
     const { key } = req.body;
-    console.log(key);
 
     const admin = await admin_model.findOne({ key_code: key });
-    console.log(admin);
 
     if (!admin) {
       return res.status(500).json({ message: "File upload failed." });
