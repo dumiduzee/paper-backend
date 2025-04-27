@@ -14,6 +14,7 @@ dotenv.config();
 const app = express();
 
 // Middleware
+//all middleware
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
 app.use(bodyParser.urlencoded({ extended: true }));
