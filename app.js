@@ -8,6 +8,7 @@ import bodyParser from "body-parser";
 import get_paper_router from "./routes/get.papers.js";
 import { connect_db } from "./db/db.js";
 import email_router from "./routes/emai.route.js";
+import admin_model from "./models/adminUser.js";
 
 dotenv.config();
 
@@ -44,4 +45,12 @@ app.use("/api/v1/papers", get_paper_router);
 app.use("/api/v1/contact", email_router);
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, async () => {
+  // admin seed
+  // const admin = new admin_model({
+  //   role:"admin",
+  //   key_code:"admin4444"
+  // })
+  // await admin.save()
+  console.log(`Server running on port ${PORT}`)
+});

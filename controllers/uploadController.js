@@ -1,71 +1,101 @@
 import multer from "multer";
 import path from "path";
-import fs from "fs";
+import { createClient } from "@supabase/supabase-js";
 import Upload from "../models/uploadModel.js";
 import admin_model from "../models/adminUser.js";
+import dotenv from "dotenv";
 
-// Configure Storage
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const { grade, subject } = req.body;
+dotenv.config();
 
-    const uploadDir = path.join("public/uploads", `grade_${grade}`, subject);
+// Initialize Supabase client
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    const uniqueFileName = `${req.body.fileName
-      .trim()
-      .replace(/ /g, "_")}-${Date.now()}${path.extname(file.originalname)}`;
-    cb(null, uniqueFileName);
-  },
-});
-
+// Use memory storage to hold files temporarily
+const storage = multer.memoryStorage();
 const upload = multer({ storage }).array("pdfs", 20);
 
 export const handleFileUpload = (req, res) => {
   upload(req, res, async (err) => {
     const { key } = req.body;
 
-    const admin = await admin_model.findOne({ key_code: key });
-
-    if (!admin) {
-      return res.status(500).json({ message: "File upload failed." });
-    }
-    if (err) return res.status(500).json({ message: "File upload failed." });
-
     try {
+      // Admin authorization is commented out as per your version
+      const admin = await admin_model.findOne({ key_code: key });
+      if (!admin) {
+        return res.status(401).json({ message: "Unauthorized upload attempt." });
+      }
+      if (err) return res.status(500).json({ message: "File upload failed." });
+
       const { grade, subject, fileName } = req.body;
+      console.log(fileName);
 
-      const baseUrl = `${req.protocol}://${req.get("host")}`;
-      const fileUrls = req.files.map(
-        (file) =>
-          `${baseUrl}/uploads/grade_${grade}/${subject}/${file.filename
-            .trim()
-            .replace(/ /g, "_")}`
-      );
+      const bucketName = "paperbuckert"; // your actual bucket name
 
+      // Encode folder parts to make safe keys
+      const encodedGrade = encodeURIComponent(`grade_${grade}`);
+      const encodedSubject = encodeURIComponent(subject);
+
+      const folderPath = `${encodedGrade}/${encodedSubject}`;
+
+      const uploadedFilesUrls = [];
+
+      for (const file of req.files) {
+        // Encode fileName safely
+        const safeFileName = encodeURIComponent(fileName.trim().replace(/ /g, "_"));
+        const uniqueFileName = `${safeFileName}-${Date.now()}${path.extname(file.originalname)}`;
+        console.log(uniqueFileName);
+        
+
+        const filePath = uniqueFileName
+
+        // Upload file buffer to Supabase
+        const { data, error } = await supabase.storage
+          .from(bucketName)
+          .upload(filePath, file.buffer, {
+            contentType: file.mimetype,
+            cacheControl: "3600",
+            upsert: false,
+          });
+          
+          
+
+        if (error) {
+          console.error("Supabase upload error:", error);
+          return res.status(500).json({ message: "Error uploading to storage." });
+        }
+
+        // Get public URL
+        const { publicURL, error: urlError } = supabase.storage
+          .from(bucketName)
+          .getPublicUrl(filePath);
+
+        if (urlError) {
+          console.error("Supabase getPublicUrl error:", urlError);
+          return res.status(500).json({ message: "Error getting public URL." });
+        }
+
+        uploadedFilesUrls.push(`${process.env.SUPABASE_URL}/storage/v1/object/public/${data.fullPath}`);
+       ;
+        
+      }
+
+      // Save URLs in MongoDB
       const newUpload = new Upload({
         grade,
         subject,
         fileName,
-        filePaths: fileUrls,
+        filePaths: uploadedFilesUrls,
       });
       await newUpload.save();
 
       res.status(200).json({
         success: true,
         message: "Upload successful.",
-        uploadedFiles: fileUrls,
+        uploadedFiles: uploadedFilesUrls,
       });
     } catch (error) {
-      console.log(error);
-
-      res.status(500).json({ message: "Error saving file data." });
+      console.error(error);
+      res.status(500).json({ message: "Internal server error." });
     }
   });
 };
